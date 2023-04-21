@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "EEG-Familiarity"
+  site-url: "https://FleischerResearchLab.github.io/EEG-Familiarity"
+  description: "EEG Familiarity prediction, installable distribution."
+  repo-branch: main
+  repo-url: "https://github.com/FleischerResearchLab/EEG-Familiarity"
