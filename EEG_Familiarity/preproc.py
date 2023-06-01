@@ -7,8 +7,11 @@ __all__ = ['preproc']
 import scipy
 import numpy as np
 from sklearn.model_selection import LeaveOneGroupOut
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+sns.set_style("darkgrid")
 
 # %% ../nbs/api/00_preproc.ipynb 4
 # wrapper class for data preprocessing
@@ -62,7 +65,7 @@ class preproc:
 
         # keep track of the subject that we kept out because they did not
         # meet certain criteria. In this case, is the participant with less
-        # than 10 observation on the pos or neg class.
+        # than 10 observations on the pos or neg class.
         self.left_out_subject = []
 
     
@@ -198,8 +201,8 @@ class preproc:
         given positive and negative index array, indexing out the
         given data matrices and flattern them out
 
-        This will excluding the subject with
-            10 or less trials on each class.
+        This will exclude the subject with
+            10 or fewer trials on each class.
         
         Parameters
         ----------
@@ -259,8 +262,8 @@ class preproc:
         given an index array, indexing out the
         given data matrices and flattern them out
 
-        This will excluding the subject with
-            10 or less trials on each class.
+        This will exclude the subject with
+            10 or fewer trials on each class.
         
         Parameters
         ----------
@@ -285,7 +288,7 @@ class preproc:
             class_len = index.sum()
 
             if class_len < 10:
-                # if this subject has less that 10 trails on 
+                # if this subject has less than 10 trails on
                 # each class of interests
                 continue
             
@@ -312,24 +315,32 @@ class preproc:
         Returns
         -------
         X : np.ndarray
-            the input for the formatted flattern data
+            the input for the formatted flatten data
 
         Notes
         -----
-        y is omitted in this multiclass settings.
+        y is omitted in this multiclass setting.
         """
         # should match when accessing the same index
         return self.behav_feat[participant]
     
     
-    def generate_projections(self, clf, pos_idx, neg_idx, X, y, subject):
+    def generate_projections(self,
+                             clf,
+                             pos_idx_highlight,
+                             neg_idx_highlight,
+                             X,
+                             y,
+                             subject,
+                             balance=False,
+                             plt=plt):
         """
         A function used to generate the projections based on the classifier
         and according to different positive and negative classes. 
-        
-    
-        Parameters
-        ----------
+
+
+        Parameters:
+        -----------
         clf : LinearDiscriminantAnalysis
             the LDA classfier that is used to train the model
         pos_idx : np.ndarray
@@ -342,13 +353,16 @@ class preproc:
             the labels of the dataset
         subject : np.ndarray
             the subject index array
-            
-        Returns
-        -------
+
+        Outputs:
+        --------
         A projection graph that projct the whole data of one complete participant (the participant is determined by LOSO)
         """
         # the x-axis on the projection graph
-        x_axis = [(1, 1), (3, 1), (5, 1), (1, 2), (5, 2), (1, 3), (3, 3), (5, 3), (4, 4), (2, 4), (4, 5), (2, 5)]
+        x_axis = [(1, 1), (3, 1), (5, 1),
+                  (1, 2), (5, 2), (1, 3),
+                  (3, 3), (5, 3), (4, 4),
+                  (2, 4), (4, 5), (2, 5)]
         projections = []
 
         logo = LeaveOneGroupOut()
@@ -357,8 +371,21 @@ class preproc:
             # select out the id of the participant that we left out
             participant = int(subject[curr])
             curr += len(test_idx)
-            # this LOSO follows the sequence of ppl presented in subject
+            # this LOSO follows the sequence of ppl presented in a subject
             X_train, X_test, y_train, y_test = X[train_idx], X[test_idx], y[train_idx], y[test_idx]
+            if balance:
+                pos_idx, neg_idx = np.arange(len(train_idx))[y_train == 1], np.arange(len(train_idx))[y_train != 1]
+                pos_len, neg_len = len(pos_idx), len(neg_idx)
+                if pos_len > neg_len:
+                    # when there are more positive class than negative,
+                    # randomly drop positive class to equivalent the negative class
+                    pos_chosen = np.random.choice(pos_idx, neg_len, replace=False)
+                    neg_chosen = neg_idx
+                else:
+                    pos_chosen = pos_idx
+                    neg_chosen = np.random.choice(neg_idx, pos_len, replace=False)
+                filter_test_idx = np.concatenate([pos_chosen, neg_chosen])
+                X_train, y_train = X_train[filter_test_idx, :], y_train[filter_test_idx]
             clf.fit(X_train, y_train)
             # project the whole data of this complete participant
             X_subject = self.get_data_by_participant(participant)
@@ -382,11 +409,12 @@ class preproc:
         plt.errorbar(x_name, summary_stats[:,0], yerr = summary_stats[:,1],
                      fmt='o', capsize=3, c = 'black')
         # pos
-        plt.errorbar(x_name[pos_idx], summary_stats[pos_idx,0],
-                     yerr = summary_stats[pos_idx,1] , fmt='o', capsize=3, c = 'lime', label="neg class")
+        plt.errorbar(x_name[pos_idx_highlight], summary_stats[pos_idx_highlight,0],
+                     yerr = summary_stats[neg_idx_highlight,1] , fmt='o', capsize=3, c = 'lime', label="neg class")
         # neg
-        plt.errorbar(x_name[neg_idx], summary_stats[neg_idx,0],
-                     yerr = summary_stats[neg_idx,1] , fmt='o', capsize=3, c = 'red', label="pos class")
-
-        _ = plt.xticks(rotation=45)
+        plt.errorbar(x_name[neg_idx_highlight], summary_stats[neg_idx_highlight,0],
+                     yerr = summary_stats[neg_idx_highlight,1] , fmt='o', capsize=3, c = 'red', label="pos class")
+        
+        _ = plt.set_xticks(x_name, rotation=45)
         plt.legend()
+

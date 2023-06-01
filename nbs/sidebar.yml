@@ -5,3 +5,6 @@ website:
       - section: api
         contents:
           - api/00_preproc.ipynb
+      - section: experiments
+        contents:
+          - experiments/LDA_projections.ipynb

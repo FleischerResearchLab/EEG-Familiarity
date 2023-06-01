@@ -1,0 +1,24 @@
+name: eeg
+
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10.10
+  - numpy
+  - matplotlib
+  - pandas
+  - jupyterlab
+  - partd
+  - bokeh
+  - nbdev
+  - pip
+  - pip:
+    - scipy
+    - scikit-learn
+    - seaborn
+    - matlabengine
+    - h5py
+    
