@@ -19,6 +19,6 @@ dependencies:
     - scipy
     - scikit-learn
     - seaborn
-    - matlabengine
-    - h5py
+#    - h5py
+#    - Oct2py
     

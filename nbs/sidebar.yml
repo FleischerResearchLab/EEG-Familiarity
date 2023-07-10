@@ -5,6 +5,16 @@ website:
       - section: api
         contents:
           - api/00_preproc.ipynb
-      - section: experiments
+          - api/01_feature_extractor.ipynb
+          - api/90_dev_eeglab.ipynb
+#      - section: experiments
+#        contents:
+#          - experiments/LDA_projections.ipynb
+      - section: tutorials
         contents:
-          - experiments/LDA_projections.ipynb
+          - tutorials/00_data_format.ipynb
+          - tutorials/01_data_filter.ipynb
+          - tutorials/02_projection_example.ipynb
+      - section: TODOs
+        contents:
+          - TODOs/00_todo_list.ipynb

@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['preproc']
 
-# %% ../nbs/api/00_preproc.ipynb 3
+# %% ../nbs/api/00_preproc.ipynb 4
 import scipy
 import numpy as np
 from sklearn.model_selection import LeaveOneGroupOut
@@ -13,7 +13,7 @@ import seaborn as sns
 
 sns.set_style("darkgrid")
 
-# %% ../nbs/api/00_preproc.ipynb 4
+# %% ../nbs/api/00_preproc.ipynb 5
 # wrapper class for data preprocessing
 class preproc:
     """
